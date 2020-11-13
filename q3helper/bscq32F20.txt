@@ -1,0 +1,71 @@
+# Setup
+c-->from importlib import reload
+c-->import private
+c-->reload(private)
+c-->from private import C
+
+# Test __setattr__
+c-->o=C()
+^-->o.private_x = 'error'-->NameError
+==-->o.__dict__-->{'private_a': 1, 'private_b': 2}
+c-->o.add_more_attributes()
+c-->o.d = 5
+==-->o.__dict__-->{'private_a': 1, 'private_b': 2, 'c': 3, 'd': 5}
+^-->o.private_a = 'error'-->NameError
+^-->o.private_c = 'error'-->NameError
+^-->o.bad_add_more_attributes()-->NameError
+c-->o.a_private_is_ok_name = 1 # not START with private_
+==-->o.__dict__-->{'private_a': 1, 'private_b': 2, 'c': 3, 'd': 5, 'a_private_is_ok_name': 1}
+c-->del o.__dict__['a_private_is_ok_name']
+
+# Test __getattr__
+c-->o.bump() # also testing __seattr__, since self.a += 1 is like self.a = self.a + 1
+==-->o.__dict__-->{'private_a': 2, 'private_b': 3, 'c': 4, 'd': 5, }
+e-->o.c-->4
+e-->o.d-->5
+^-->o.a-->NameError
+^-->o.b-->NameError
+e-->str(o)-->a=2,b=3,c=4,d=5
+^-->private.f(o)-->NameError
+c-->private.__init__(o)
+==-->o.__dict__-->{'private_a': 2, 'private_b': 3, 'c': 4, 'd': 5, 'z': 'z'}
+
+# Loopholes:  should raise exceptions for 100% private but don't in this implementation
+#             because __getattr__ is not called (these names are in the __dict__)
+e-->o.private_a-->2
+e-->o.private_b-->3
+
+# Extra tests: Substituting methods in class C
+c-->import extra
+c-->C.__init__ = extra.__init__
+c-->C.add_more_attributes = extra.add_more_attributes
+c-->C.bad_add_more_attributes = extra.bad_add_more_attributes
+c-->C.bump = extra.bump
+c-->C.__str__ = extra.__str__
+
+# Test __setattr__
+c-->o=C()
+^-->o.private_z = 'error'-->NameError
+==-->o.__dict__-->{'private_l': 1, 'private_m': 2}
+c-->o.add_more_attributes()
+c-->o.o = 5
+==-->o.__dict__-->{'private_l': 1, 'private_m': 2, 'n': 3, 'o': 5}
+^-->o.private_l = 'error'-->NameError
+^-->o.private_q = 'error'-->NameError
+^-->o.bad_add_more_attributes()-->NameError
+^-->extra.extra_bump(o)-->NameError
+c-->o.l_private_is_ok_name = 1 # not START with private_
+==-->o.__dict__-->{'private_l': 1, 'private_m': 2, 'n': 3, 'o': 5, 'l_private_is_ok_name' : 1}
+c-->del o.__dict__['l_private_is_ok_name']
+
+# Test __getattr__
+c-->o.bump() # also testing __seattr__, since self.a += 1 is like self.a = self.a + 1
+==-->o.__dict__-->{'private_l': 2, 'private_m': 3, 'n': 4, 'o': 5}
+e-->o.n-->4
+e-->o.o-->5
+^-->o.l-->NameError
+^-->o.m-->NameError
+e-->str(o)-->l=2,m=3,n=4,o=5
+^-->private.f(o)-->NameError
+c-->private.__init__(o)
+==-->o.__dict__-->{'private_l': 2, 'private_m': 3, 'n': 4, 'o': 5, 'z': 'z'}
