@@ -2,13 +2,12 @@ import prompt, traceback
 
 from goody import type_as_str
 
-# default_file_name              = "bscq5F20.txt"
-# default_separator              = '-->'
-# default_show_comment           = True
-# default_show_all               = False
-# default_show_traceback         = False
-# default_show_exception         = False
-# default_show_exception_message = False
+default_separator              = '-->'
+default_show_comment           = True
+default_show_all               = False
+default_show_traceback         = False
+default_show_exception         = False
+default_show_exception_message = False
 
 
 # batch_self_check reads/processes every test in a file. There are five forms
