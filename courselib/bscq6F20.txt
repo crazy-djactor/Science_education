@@ -1,0 +1,85 @@
+# Setup
+c-->from importlib import reload
+c-->import q6solution
+c-->reload(q6solution)
+c-->from goody import irange
+c-->from q6solution import separate, is_min_heap, bases, popdict
+c-->from q6solution import list_to_ll, str_ll, list_to_tree
+c-->from predicate import is_prime
+
+# Test separate
+==-->separate(None,lambda x : True)-->None,None
+c-->ll = list_to_ll([i for i in range(18)])
+c-->even,odd = separate(ll,lambda x : x%2 == 0)
+e-->str_ll(even)-->16->14->12->10->8->6->4->2->0->None
+e-->str_ll(odd)-->17->15->13->11->9->7->5->3->1->None
+c-->prime,composite = separate(ll,is_prime)
+e-->str_ll(prime)-->17->13->11->7->5->3->2->None
+e-->str_ll(composite)-->16->15->14->12->10->9->8->6->4->1->0->None
+c-->small,big = separate(ll,lambda x : x <= 8) 
+e-->str_ll(small)-->8->7->6->5->4->3->2->1->0->None
+e-->str_ll(big)-->17->16->15->14->13->12->11->10->9->None
+
+# Test is_min_heap
+c-->t = None
+e-->is_min_heap(t)-->True
+c-->t = list_to_tree([1,[2,None,None],[3,None,None]]) 
+e-->is_min_heap(t)-->True
+c-->t = list_to_tree([2,[1,None,None],[3,None,None]])
+e-->is_min_heap(t)-->False
+c-->t =  list_to_tree([3,[2,None,None],[1,None,None]])
+e-->is_min_heap(t)-->False
+c-->t = list_to_tree([1,None,[3,None,None]]) 
+e-->is_min_heap(t)-->True
+c-->t = list_to_tree([1,[2,None,None],None])
+e-->is_min_heap(t)-->True
+c-->t = list_to_tree([3,None,[1,None,None]]) 
+e-->is_min_heap(t)-->False
+c-->t = list_to_tree([2,[1,None,None],None])
+e-->is_min_heap(t)-->False
+c-->t = list_to_tree([5,[8,[16,[32,None,None],[46,[70,None,None],[82,None,None]]],None],[12,[24,None,[30,[40,None,None],[70,None,None]]],None]])
+e-->is_min_heap(t)-->True
+c-->t = list_to_tree([5,[8,[16,[32,None,None],[46,[46,None,None],[82,None,None]]],None],[12,[24,None,[30,[40,None,None],[70,None,None]]],None]])
+e-->is_min_heap(t)-->False
+c-->t = list_to_tree([5,[8,[16,[32,None,None],[46,[70,None,None],[46,None,None]]],None],[12,[24,None,[30,[40,None,None],[70,None,None]]],None]])
+e-->is_min_heap(t)-->False
+
+# Test bases
+c-->class F:pass
+c-->class C:pass
+c-->class G:pass
+c-->class B(F):pass
+c-->class D(G):pass
+c-->class A(B,C,D):pass
+==-->bases(A)-->set(A.__mro__)
+c-->class A: pass	
+c-->class B: pass
+c-->class C(A): pass	
+c-->class D(A,B): pass
+c-->class E(A): pass
+c-->class F(C,D): pass	
+c-->class G(B): pass
+c-->class H(E,F,G): pass
+==-->bases(A)-->set(A.__mro__)
+
+# Test popdict
+c-->d = popdict([('a',100)],b=200,c=300)
+==-->d-->{'a': 100, 'b': 200, 'c': 300}
+e-->[(k,d(k)) for k in 'abcx']-->[('a', 1), ('b', 1), ('c', 1), ('x', 0)]
+c-->d['a']; d['b']; d['b']; d['a'] = 103; d['a'] += 1; d['c'] += 5; d['c'] += 1; d['c'] += 1
+^-->d['x']-->KeyError
+==-->d-->{'a': 104, 'b': 200, 'c': 307}
+e-->[(k,d(k)) for k in 'abcx']-->[('a', 5), ('b', 3), ('c', 7), ('x', 0)]
+e-->[k for k in d]-->['c', 'a', 'b']
+c-->del d['a']
+==-->d-->{'b': 200, 'c': 307}
+e-->[(k,d(k)) for k in 'abcx']-->[('a', 0), ('b', 3), ('c', 7), ('x', 0)]
+e-->[k for k in d]-->['c', 'b']
+c-->d.clear()
+==-->d-->{}
+e-->[(k,d(k)) for k in 'abcx']-->[('a', 0), ('b', 0), ('c', 0), ('x', 0)]
+e-->[k for k in d]-->[]
+c-->d = popdict([('a',100)],b=200,c=300)
+e-->len(d)-->3
+==-->set(d.keys())-->{'a','b','c'}
+==-->set(d.items())-->{('a', 100), ('b', 200), ('c', 300)} 
