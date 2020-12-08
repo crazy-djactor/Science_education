@@ -82,7 +82,7 @@ class Check_Annotation:
                     self.check(_param, _annot[0], _value[i], history)
                     history = history + f"{_type} [{i}] check: {str(annot[0])} \n"
                 return True
-            if not len(_annot) == len(_value):
+            if len(_annot) != len(_value):
                 assert False, f"{repr(_param)} failed annotation check(wrong number of elements) : \n " \
                               f"value = [{str(len(_value))}] \n annotation had {str(len(_annot))} " \
                               f"elements {str(_annot)} \n {history}"
@@ -238,12 +238,13 @@ class Check_Annotation:
 
 if __name__ == '__main__':
     # an example of testing a simple annotation
-    # driver tests
-    import driver
-
-    def f(x: None) -> int: return x
+    def f(x: int): pass
     f = Check_Annotation(f)
     f(3)
+    f('a')
+
+    # driver tests
+    import driver
 
     driver.default_file_name = 'bscp4F20.txt'
     #     driver.default_show_exception= True

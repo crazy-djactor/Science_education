@@ -1,0 +1,76 @@
+# Setup
+c-->from imp import reload
+c-->import exam
+c-->reload(exam)
+c-->from exam import zip_skip, closest_sums, shared_dict
+c-->from ile3helper import ints, primes, hide, nth, nth_for_m, is_prime
+c-->from inspect import isgeneratorfunction, isgenerator
+c-->from goody import irange
+c-->from predicate import is_even
+
+# Test zip_skip
+e-->isgenerator(zip_skip( (lambda x : is_even(x)), False))-->True
+e-->list(zip_skip( (lambda x : is_even(x)), False, hide([0, 0, 1, 1, 0]), hide([0, 1, 0, 1, 'X'])))-->[(0, 0)]
+e-->list(zip_skip( (lambda x : is_even(x)), True , hide([0, 0, 1, 1, 0]), hide([0, 1, 0, 1, 'X'])))-->[(0, 0), (0, 'X')]
+e-->list(nth_for_m(zip_skip( (lambda x : x%10 == 7), True, ints(), primes()),50,10))-->[(1777, 15227), (1797, 15377), (1807, 15467), (1877, 16127), (1927, 16657), (1967, 17047), (1977, 17167), (1997, 17377), (2027, 17627), (2037, 17747)]
+
+# Test closest_sums
+c-->l,r = closest_sums([],[],[])
+e-->l,r-->([], [])
+c-->l,r = closest_sums([2,5,8],[],[])
+e-->sorted([sorted(l),sorted(r)])-->[[2, 5], [8]]
+c-->l,r = closest_sums([1,10,8,11,1,9,10],[],[])
+e-->sorted([sorted(l),sorted(r)])-->[[1, 1, 10, 11], [8, 9, 10]]
+
+# Test shared_dict: __setitem__
+c-->sd = shared_dict()
+==-->sd._counts-->{}
+==-->sd._stored_kvs-->{}
+==-->sd-->{}
+c-->sd['a'] = tuple([1,2,3])
+==-->sd._counts-->{'a': 1, (1, 2, 3): 1}
+==-->sd._stored_kvs-->{'a': 'a', (1, 2, 3): (1, 2, 3)}
+==-->sd-->{'a': (1, 2, 3)}
+c-->sd['b'] = tuple([1,2,3])
+==-->sd._counts-->{'a': 1, (1, 2, 3): 2, 'b': 1}
+==-->sd._stored_kvs-->{'a': 'a', (1, 2, 3): (1, 2, 3), 'b': 'b'}
+==-->sd-->{'a': (1, 2, 3), 'b': (1, 2, 3)}
+e-->sd['a'] is sd['b']-->True
+c-->sd['c'] = 'c'
+==-->sd._counts-->{'a': 1, (1, 2, 3): 2, 'b': 1, 'c': 2}
+==-->sd._stored_kvs-->{'a': 'a', (1, 2, 3): (1, 2, 3), 'b': 'b', 'c': 'c'}
+==-->sd-->{'a': (1, 2, 3), 'b': (1, 2, 3), 'c': 'c'}
+c-->sd[tuple([1,2,3])] = 'd'
+==-->sd._counts-->{'a': 1, (1, 2, 3): 3, 'b': 1, 'c': 2, 'd': 1}
+==-->sd._stored_kvs-->{'a': 'a', (1, 2, 3): (1, 2, 3), 'b': 'b', 'c': 'c', 'd': 'd'}
+==-->sd-->{'a': (1, 2, 3), 'b': (1, 2, 3), 'c': 'c', (1, 2, 3): 'd'}
+e-->sd.verify_shared(trace_all=False)-->0
+==-->[len(sd), 'a' in sd, 'x' in sd, list(sd.keys()), list(sd.values()), list(sd.items())]-->[4, True, False, ['a', 'b', 'c', (1, 2, 3)], [(1, 2, 3), (1, 2, 3), 'c', 'd'], [('a', (1, 2, 3)), ('b', (1, 2, 3)), ('c', 'c'), ((1, 2, 3), 'd')]]
+
+# Test shared_dict: __delitem__
+c-->del sd['a']
+==-->sd._counts-->{(1, 2, 3): 2, 'b': 1, 'c': 2, 'd': 1}
+==-->sd._stored_kvs-->{(1, 2, 3): (1, 2, 3), 'b': 'b', 'c': 'c', 'd': 'd'}
+==-->sd-->{'b': (1, 2, 3), 'c': 'c', (1, 2, 3): 'd'}
+c-->del sd['b']
+==-->sd._counts-->{(1, 2, 3): 1, 'c': 2, 'd': 1}
+==-->sd._stored_kvs-->{(1, 2, 3): (1, 2, 3), 'c': 'c', 'd': 'd'}
+==-->sd-->{'c': 'c', (1, 2, 3): 'd'}
+c-->del sd['c']
+==-->sd._counts-->{(1, 2, 3): 1, 'd': 1}
+==-->sd._stored_kvs-->{(1, 2, 3): (1, 2, 3), 'd': 'd'}
+==-->sd-->{(1, 2, 3): 'd'}
+c-->del sd[tuple([1,2,3])]
+==-->sd._counts-->{}
+==-->sd._stored_kvs-->{}
+==-->sd-->{}
+
+# Test shared_dict: extra credit
+c-->sd = shared_dict()
+c-->sd['a'] = tuple([1,2,3])
+c-->sd['a'] = frozenset([1,2])
+==-->sd._counts-->{'a': 1, frozenset({1, 2}): 1}
+==-->sd._stored_kvs-->{'a': 'a', frozenset({1, 2}): frozenset({1, 2})}
+==-->sd-->{'a': frozenset({1, 2})}
+e-->sd.verify_shared(trace_all=False)-->0
+

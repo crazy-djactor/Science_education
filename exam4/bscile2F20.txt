@@ -1,0 +1,189 @@
+# Setup
+c-->from imp import reload
+c-->import exam
+c-->reload(exam)
+c-->from exam import DictList
+
+# Test __init__
+^-->d  = DictList()-->AssertionError
+^-->d  = DictList(1)-->AssertionError
+^-->d  = DictList('a')-->AssertionError
+^-->d  = DictList([])-->AssertionError
+c-->d0 = dict(a=1,b=2,c=3)
+c-->d1 = dict(c=13,d=14,e=15)
+c-->d2 = dict(e=25,f=26,g=27)
+c-->d  = DictList(d0)
+e-->len(d.dl) == 1 and all(x == y for x,y in zip((d0,),d.dl))-->True
+c-->d  = DictList(d0,d1)
+e-->len(d.dl) == 2 and all(x == y for x,y in zip((d0,d1),d.dl))-->True
+c-->d  = DictList(d2,d1)
+e-->len(d.dl) == 2 and all(x == y for x,y in zip((d2,d1),d.dl))-->True
+c-->d  = DictList(d0,d1,d2)
+e-->len(d.dl) == 3 and all(x == y for x,y in zip((d0,d1,d2),d.dl))-->True
+
+# Test __len__
+c-->d = DictList(d0)
+e-->len(d)-->3
+c-->d = DictList(d0,d1)
+e-->len(d)-->5
+c-->d = DictList(d0,d2)
+e-->len(d)-->6
+c-->d = DictList(d0,d1,d2)
+e-->len(d)-->7
+
+# Test __repr__
+c-->d    = DictList(d0,d1)
+c-->drep = eval(repr(d))
+e-->type(repr(d)) is str and len(drep.dl) == 2 and all(x == y for x,y in zip((d0,d1),drep.dl))-->True
+c-->d    = DictList(d2,d1)
+c-->drep = eval(repr(d))
+e-->type(repr(d)) is str and len(drep.dl) == 2 and all(x == y for x,y in zip((d2,d1),drep.dl))-->True
+c-->d    = DictList(d0,d1,d2)
+c-->drep = eval(repr(d))
+e-->type(repr(d)) is str and len(drep.dl) == 3 and all(x == y for x,y in zip((d0,d1,d2),drep.dl))-->True
+
+# Test __contains__
+c-->d = DictList(d0,d1)
+e-->'b' in d-->True
+e-->'d' in d-->True
+e-->'f' in d-->False
+c-->d = DictList(d1,d2)
+e-->'b' in d-->False
+e-->'d' in d-->True
+e-->'f' in d-->True
+c-->d = DictList(d0,d2)
+e-->'b' in d-->True
+e-->'d' in d-->False
+e-->'f' in d-->True
+c-->d = DictList(d2,d0)
+e-->'b' in d-->True
+e-->'d' in d-->False
+e-->'f' in d-->True
+c-->d = DictList(d0,d1,d2)
+e-->'b' in d-->True
+e-->'c' in d-->True
+e-->'d' in d-->True
+e-->'x' in d-->False
+e--> 1  in d-->False
+
+# Test __getitem__
+c-->d = DictList(d0)
+e-->d['a']-->1
+e-->d['b']-->2
+e-->d['c']-->3
+^-->d['d']-->KeyError
+c-->d = DictList(d0,d1)
+e-->d['a']-->1
+e-->d['b']-->2
+e-->d['c']-->13
+e-->d['d']-->14
+e-->d['e']-->15
+^-->d['f']-->KeyError
+c-->d = DictList(d0,d1,d2)
+e-->d['a']-->1
+e-->d['b']-->2
+e-->d['c']-->13
+e-->d['d']-->14
+e-->d['e']-->25
+e-->d['f']-->26
+e-->d['g']-->27
+^-->d['x']-->KeyError
+^-->d[1]-->KeyError
+
+# Test __setitem__
+c-->d = DictList(d0,d1,d2)
+c-->d['b'] = 'new1'
+e-->d.dl[0]['b']-->new1
+c-->d['c'] = 'new2'
+e-->d.dl[0]['c']-->3
+e-->d.dl[1]['c']-->new2
+c-->d['d'] = 'new3'
+e-->d.dl[1]['d']-->new3
+c-->d['e'] = 'new4'
+e-->d.dl[1]['e']-->15
+e-->d.dl[2]['e']-->new4
+c-->d['x'] = 'new5'
+e-->d.dl[3]-->{'x': 'new5'}
+
+# Test __call__
+c-->d0 = dict(a=1,b=2,c=3)
+c-->d1 = dict(c=13,d=14,e=15)
+c-->d2 = dict(e=25,f=26,g=27)
+c-->d = DictList(d0,d1)
+e-->d('a')-->[(0, 1)]
+e-->d('b')-->[(0, 2)]
+e-->d('c')-->[(0, 3), (1, 13)]
+e-->d('d')-->[(1, 14)]
+e-->d('e')-->[(1, 15)]
+e-->d('f')-->[]
+c-->d = DictList(d1,d2)
+e-->d('a')-->[]
+e-->d('c')-->[(0, 13)]
+e-->d('d')-->[(0, 14)]
+e-->d('e')-->[(0, 15), (1, 25)]
+e-->d('f')-->[(1, 26)]
+e-->d('g')-->[(1, 27)]
+c-->d = DictList(d0,d1,d2)
+e-->d('a')-->[(0, 1)]
+e-->d('b')-->[(0, 2)]
+e-->d('c')-->[(0, 3), (1, 13)]
+e-->d('d')-->[(1, 14)]
+e-->d('e')-->[(1, 15), (2, 25)]
+e-->d('f')-->[(2, 26)]
+e-->d('g')-->[(2, 27)]
+e-->d('x')-->[]
+
+# Test __iter__
+c-->d0 = dict(a=1,b=2,c=3)
+c-->d1 = dict(c=13,d=14,e=15)
+c-->d2 = dict(e=25,f=26,g=27)
+c-->d  = DictList(d1)
+c-->produced = [i for i in d]
+e-->len(produced)-->3
+==-->produced-->[('c', 13), ('d', 14), ('e', 15)]
+c-->d  = DictList(d0,d1)
+c-->produced = [i for i in d]
+e-->len(produced)-->5
+==-->produced-->[('c', 13), ('d', 14), ('e', 15), ('a', 1), ('b', 2)]
+c-->d  = DictList(d0,d1,d2)
+c-->produced = [i for i in d]
+e-->len(produced)-->7
+==-->produced-->[('e', 25), ('f', 26), ('g', 27), ('c', 13), ('d', 14), ('a', 1), ('b', 2)]
+
+# Test ==
+c-->d1 = DictList(dict(a=1,b=2), dict(b=12,c=13))
+c-->d2 = DictList(dict(a=1,b=12), dict(c=13))
+e-->d1 == d2-->True
+e-->d1 == dict(a=1,b=12,c=13)-->True
+e-->d1 == dict(a=1,c=13)-->False
+e-->d1 == dict(a=1,b=2,c=13)-->False
+c-->d1 = DictList(dict(b=2,c=13,d=14,e=25,f=26,g=27))
+c-->d2 = DictList(dict(b=2,c=13,d=15,e=25,f=26,g=27))
+c-->d3 = DictList(dict(b=2,c=3),dict(c=13,d=14,e=15),dict(e=25,f=26,g=27))
+e-->d1 == d1-->True
+e-->d2 == d2-->True
+e-->d1 == d2-->False
+e-->d2 == d1-->False
+e-->d1 == d3-->True
+e-->d3 == d1-->True
+e-->d2 == d3-->False
+e-->d3 == d2-->False
+e-->d1 == dict(b=2,c=13,d=14,e=25,f=26,g=27)-->True
+e-->dict(b=2,c=13,d=14,e=25,f=26,g=27) == d1-->True
+^-->d1 == 1-->TypeError
+^-->d1 == []-->TypeError
+
+# Test +
+c-->d1 = DictList(dict(a=1,b=2), dict(b=12,c=13))
+c-->d2 = DictList(dict(a='one',b='two'), dict(b='twelve',c='thirteen'))
+c-->adict = dict(a='one',b='two')
+==-->d1+d2-->DictList({'a': 1, 'c': 13, 'b': 12}, {'a': 'one', 'c': 'thirteen', 'b': 'twelve'})
+==-->d2+d1-->DictList({'a': 'one', 'c': 'thirteen', 'b': 'twelve'}, {'a': 1, 'c': 13, 'b': 12})
+==-->d1+adict-->DictList({'a': 1, 'b': 2}, {'b': 12, 'c': 13}, {'a': 'one', 'b': 'two'})
+==-->adict+d1-->DictList({'a': 'one', 'b': 'two'}, {'a': 1, 'b': 2}, {'b': 12, 'c': 13})
+c-->d = d1+adict
+c-->d1['b'] = 'x'
+e-->d['b']-->two
+c-->adict['b'] = 'x'
+e-->d['b']-->two
+^-->1 + d1-->TypeError
